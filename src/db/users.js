@@ -124,7 +124,7 @@ async function getInsecureUserByEmail(email) {
     }
     return rows[0];
   } catch (e) {
-    throw e.detail;
+    throw e;
   }
 }
 

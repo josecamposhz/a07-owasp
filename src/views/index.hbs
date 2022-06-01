@@ -5,11 +5,11 @@
       <h2 class="h4">Crear usuario</h2>
       <div class="form-group mb-3">
         <label class="form-label">Email address</label>
-        <input class="form-control" type="email" name="email" required value="jose@yopmail.com" />
+        <input class="form-control" type="email" name="email" required />
       </div>
       <div class="form-group mb-3">
         <label class="form-label">Password</label>
-        <input class="form-control" type="password" name="password" required minlength="8" value="12345678" />
+        <input class="form-control" type="password" name="password" required minlength="8" />
         <div class="form-text">- La contraseña debe tener al menos 8 caracteres de largo.</div>
         <div class="form-text">- La contraseña no puede contener 3 o más caracteres consecutivos.</div>
         <div class="form-text">- La contraseña no debe estar dentro de la <a
@@ -25,11 +25,11 @@
       <h2 class="h4">Iniciar sesión</h2>
       <div class="form-group mb-3">
         <label class="form-label">Email address</label>
-        <input class="form-control" name="email" type="email" value="jose@yopmail.com" />
+        <input class="form-control" name="email" type="email" />
       </div>
       <div class="form-group mb-3">
         <label class="form-label">Password</label>
-        <input class="form-control" name="password" type="password" value="12345678owasp" />
+        <input class="form-control" name="password" type="password" />
       </div>
 
       <button type="submit" class="btn btn-info">Ingresar</button>
@@ -43,7 +43,7 @@
       <div class="form-group mb-3">
         <label class="form-label">Código de verificación de número de teléfono</label>
         <input class="d-none" id="verify-email" name="email" type="email" />
-        <input class="form-control" name="token" type="number">
+        <input class="form-control" name="token" type="number" maxlength="6">
         <div class="form-text">Introduce el código de 6 dígitos enviado al correo</div>
         <div class="form-text" id="timer"></div>
       </div>
