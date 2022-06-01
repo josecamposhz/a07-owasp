@@ -1,0 +1,114 @@
+<h1 class="py-5 text-center">OWASP 2021 - A07:2021 - Identification and Authentication Failures</h1>
+<div class="row w-75 m-auto">
+  <div class="col-5 card">
+    <form class="card-body" id="register-form">
+      <h2 class="h4">Crear usuario</h2>
+      <div class="form-group mb-3">
+        <label class="form-label">Email address</label>
+        <input class="form-control" type="email" name="email" required value="jose@yopmail.com" />
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label">Password</label>
+        <input class="form-control" type="password" name="password" required minlength="8" value="12345678" />
+        <div class="form-text">- La contraseña debe tener al menos 8 caracteres de largo.</div>
+        <div class="form-text">- La contraseña no puede contener 3 o más caracteres consecutivos.</div>
+        <div class="form-text">- La contraseña no debe estar dentro de la <a
+            href="https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10-million-password-list-top-10000.txt"
+            target="_blank">lista de las contraseñas más comunes</a>.
+        </div>
+      </div>
+      <button type="submit" class="btn btn-success mb-3">Crear</button>
+    </form>
+  </div>
+  <div class="card col-5 offset-2">
+    <form class="card-body" id="login-form">
+      <h2 class="h4">Iniciar sesión</h2>
+      <div class="form-group mb-3">
+        <label class="form-label">Email address</label>
+        <input class="form-control" name="email" type="email" value="jose@yopmail.com" />
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label">Password</label>
+        <input class="form-control" name="password" type="password" value="12345678owasp" />
+      </div>
+
+      <button type="submit" class="btn btn-info mb-3">Ingresar</button>
+    </form>
+    <form class="card-body d-none" id="verify-form">
+      <h2 class="h4">Verificación de seguridad</h2>
+      <div class="form-text mb-2">
+        Para garantizar la seguridad de tu cuenta, por favor completa la siguiente
+        verificación.
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label">Código de verificación de número de teléfono</label>
+        <input class="d-none" id="verify-email" name="email" type="email" />
+        <input class="form-control" name="token" type="number">
+        <div class="form-text">Introduce el código de 6 dígitos enviado al correo</div>
+        <div class="form-text" id="timer"></div>
+      </div>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-warning text-white mb-3">Verificar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById("register-form").addEventListener("submit", async (e) => {
+    try {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const payload = Object.fromEntries(formData);
+      const { data } = await axios.post("/auth/register", payload);
+      Swal.fire({ title: 'Usuario creado con éxito', icon: 'success' });
+    } catch ({ response }) {
+      Swal.fire({ title: response.data.error, icon: 'error' });
+    }
+  });
+
+  document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const payload = Object.fromEntries(formData);
+    try {
+      const { data } = await axios.post("/auth/login", payload);
+      Swal.fire({ title: data.message, icon: 'success' });
+      document.getElementById("verify-email").value = payload.email;
+      document.getElementById("login-form").classList.add("d-none");
+      document.getElementById("verify-form").classList.remove("d-none");
+      updateTimer(data.timeRemaining);
+    } catch ({ response }) {
+      Swal.fire({ title: response.data.error || response.data, icon: 'error' });
+    }
+  });
+
+  document.getElementById("verify-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const payload = Object.fromEntries(formData);
+    try {
+      const { data } = await axios.post("/auth/verify", payload);
+      Swal.fire({ title: 'Verificación exitosa', icon: 'success' });
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+      window.location.href = "/profile?token=" + data.token;
+    } catch ({ response }) {
+      Swal.fire({ title: response.data.error, icon: 'error' });
+    }
+  });
+
+  function updateTimer(currentTime) {
+    const timer = document.getElementById("timer");
+    timer.innerHTML = "Tiempo restante: " + currentTime;
+    if (currentTime <= 0) {
+      timer.innerHTML = "Tiempo restante: 0";
+      Swal.fire({ title: 'Tiempo de verificación agotado', icon: 'error' });
+      document.getElementById("verify-form").classList.add("d-none");
+      document.getElementById("login-form").classList.remove("d-none");
+    } else {
+      setTimeout(() => {
+        updateTimer(currentTime - 1);
+      }, 1000);
+    }
+  }
+</script>
