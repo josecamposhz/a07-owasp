@@ -2,23 +2,15 @@ const { Router } = require('express');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require('uuid');
-
-const { sendVerificationEmail } = require('../services/email');
-
 const { totp } = require('otplib');
+const rateLimit = require('express-rate-limit');
+const requiresAuth = require('../middlewares/requiresAuth');
+const commonPasswords = require("../../password-list.json");
+const { sendVerificationEmail } = require('../services/email');
+const db = require('../db/users');
+
 totp.options = { step: 90, algorithm: 'sha256' };
 
-const rateLimit = require('express-rate-limit');
-const loginLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 10, // Limit each IP to 100 requests per `window` (here, per 1 minutes)
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  message: "Has superado el límite de solicitudes, vuelve a intentarlo en unos minutos"
-});
-
-const db = require('../db/users');
-const commonPasswords = require("../../password-list.json");
 const router = Router();
 
 router.post("/register", async (req, res) => {
@@ -46,6 +38,14 @@ router.post("/register", async (req, res) => {
   }
 });
 
+
+const loginLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 10, // Limit each IP to 100 requests per `window` (here, per 1 minutes)
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  message: "Has superado el límite de solicitudes, vuelve a intentarlo en unos minutos"
+});
 router.post("/login", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -86,9 +86,13 @@ router.post('/verify', async (req, res) => {
   const isValid = totp.verify({ token, secret });
   if (isValid) {
     const token = jwt.sign(user, process.env.SECRET_KEY, { expiresIn: 60 * 60 * 24 });
-    return res.status(200).json({ message: 'Verificación exitosa', token });
+    return res.status(200).json({ token });
   }
   res.status(400).json({ error: 'Verificación fallida' });
+});
+
+router.get('/user', requiresAuth, (req, res) => {
+  res.status(200).send(req.user);
 });
 
 

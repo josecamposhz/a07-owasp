@@ -1,9 +1,8 @@
-CREATE DATABASE owasp;
+-- CREATE DATABASE owasp;
 
 CREATE TABLE insecure_users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(60) UNIQUE NOT NULL,
-    nombre VARCHAR(60) NOT NULL,
     password VARCHAR(60) NOT NULL
 );
 

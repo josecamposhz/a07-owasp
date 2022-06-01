@@ -1,4 +1,4 @@
-<h1 class="py-5 text-center">OWASP 2021 - A07:2021 - Identification and Authentication Failures</h1>
+<a href="/insecure" class="d-block text-center mb-4">Ir al Login Inseguro</a>
 <div class="row w-75 m-auto">
   <div class="col-5 card">
     <form class="card-body" id="register-form">
@@ -17,7 +17,7 @@
             target="_blank">lista de las contraseñas más comunes</a>.
         </div>
       </div>
-      <button type="submit" class="btn btn-success mb-3">Crear</button>
+      <button type="submit" class="btn btn-success">Crear</button>
     </form>
   </div>
   <div class="card col-5 offset-2">
@@ -32,7 +32,7 @@
         <input class="form-control" name="password" type="password" value="12345678owasp" />
       </div>
 
-      <button type="submit" class="btn btn-info mb-3">Ingresar</button>
+      <button type="submit" class="btn btn-info">Ingresar</button>
     </form>
     <form class="card-body d-none" id="verify-form">
       <h2 class="h4">Verificación de seguridad</h2>
@@ -48,7 +48,7 @@
         <div class="form-text" id="timer"></div>
       </div>
       <div class="d-grid">
-        <button type="submit" class="btn btn-warning text-white mb-3">Verificar</button>
+        <button type="submit" class="btn btn-warning text-white">Verificar</button>
       </div>
     </form>
   </div>
@@ -90,8 +90,8 @@
     try {
       const { data } = await axios.post("/auth/verify", payload);
       Swal.fire({ title: 'Verificación exitosa', icon: 'success' });
-      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-      window.location.href = "/profile?token=" + data.token;
+      localStorage.setItem("token", data.token);
+      window.location.href = "/profile";
     } catch ({ response }) {
       Swal.fire({ title: response.data.error, icon: 'error' });
     }

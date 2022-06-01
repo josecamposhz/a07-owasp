@@ -21,12 +21,10 @@ async function createUser({ email, password }) {
       text: `INSERT INTO users (email, password) values ($1, $2) RETURNING *;`,
       values: [email, password]
     };
-
     const result = await pool.query(SQLQuery);
-
     return result.rows[0];
   } catch (e) {
-    throw e;
+    throw 'Ocurrió un error al crear el usuario';
   }
 }
 
@@ -85,7 +83,7 @@ async function getUserByEmail(email) {
     }
     return rows[0];
   } catch (e) {
-    throw e;
+    throw 'Credenciales inválidas';
   }
 }
 
@@ -100,4 +98,43 @@ async function getUsers() {
     return e;
   }
 }
-module.exports = { createUser, updateUserSecret, updateFailedLogin, deleteUser, getUserByEmail, getUsers };
+
+async function createInsecureUser({ email, password }) {
+  try {
+    const SQLQuery = {
+      text: `INSERT INTO insecure_users (email, password) values ($1, $2) RETURNING *;`,
+      values: [email, password]
+    };
+    const result = await pool.query(SQLQuery);
+    return result.rows[0];
+  } catch (e) {
+    throw e.detail;
+  }
+}
+
+async function getInsecureUserByEmail(email) {
+  try {
+    const SQLQuery = {
+      text: `SELECT * FROM insecure_users WHERE email = $1;`,
+      values: [email]
+    };
+    const { rows } = await pool.query(SQLQuery);
+    if (rows.length === 0) {
+      throw 'Usuario no encontrado';
+    }
+    return rows[0];
+  } catch (e) {
+    throw e.detail;
+  }
+}
+
+module.exports = {
+  createUser,
+  updateUserSecret,
+  updateFailedLogin,
+  deleteUser,
+  getUserByEmail,
+  getUsers,
+  createInsecureUser,
+  getInsecureUserByEmail
+};

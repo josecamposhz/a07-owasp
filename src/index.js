@@ -1,6 +1,5 @@
 const express = require("express");
 const exphbs = require("express-handlebars");
-const requiresAuth = require('./middlewares/requiresAuth');
 require('dotenv').config();
 
 const app = express();
@@ -28,11 +27,18 @@ app.set("views", __dirname + "/views");
 app.get("/", (req, res) => {
   res.render("index");
 });
-
-app.get("/profile", requiresAuth, (req, res) => {
-  res.render("profile", { user: req.user });
+app.get("/insecure", (req, res) => {
+  res.render("insecure");
+});
+app.get("/profile", (req, res) => {
+  res.render("profile");
 });
 
 // API REST
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/insecure-auth", require("./routes/insecure-auth"));
 app.use("/api/users", require("./routes/users"));
+
+app.use("*", (req, res) => {
+  res.render("404");
+});
